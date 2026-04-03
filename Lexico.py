@@ -1,11 +1,17 @@
+import Lexico2
+
 global num_linha
 num_linha = 1
 
 global f
-f = open("nome_do_arq.txt")
 
 global c
 c = ' '
+
+def arquivoOpen(nome):
+    global f
+    f = open(nome)
+
 
 def lexico():
  global c
@@ -20,7 +26,7 @@ def lexico():
         if comentario_linha:
             comentario_linha = False
         num_linha += 1
-    if c in "{}();~+-*/=.,@" and not lemos_aspas and (not comentario and not comentario_linha):
+    if c in "{}();:~+-*/=.,@" and not lemos_aspas and (not comentario and not comentario_linha):
         if c == '=':
             aux2 = f.read(1)
             if aux2 == '>':
@@ -30,11 +36,11 @@ def lexico():
 
         aux = c
         c = ' '
-        return aux
+        return Lexico2.tipador(aux)
     else:
         c = f.read(1)
         if not c: 
-            return "Fim do arquivo"
+            return Lexico2.tipador("Fim do Arquivo")
         if c in '(-' or (c == '*' and comentario):
             aux = f.read(1)
             if aux in '*-' or (aux == ')' and comentario):
@@ -51,30 +57,21 @@ def lexico():
             if aux == '-' or aux == '=':
                 if palavra != '':
                     f.seek(f.tell()-2,0)
-                    return palavra
+                    return Lexico2.tipador(palavra)
                 else:
-                    return c+aux
+                    return Lexico2.tipador(c+aux)
             else:
                 if palavra != '':
                     f.seek(f.tell()-2,0)
-                    return palavra
+                    return Lexico2.tipador(palavra)
                 else:
                     f.seek(f.tell()-1,0)
-                    return c
+                    return Lexico2.tipador(c)
         if not comentario and not comentario_linha:
             if c == '"':
                 lemos_aspas = not lemos_aspas
-            if c not in " '\t''\n'{}();~+-*/=.,@" or lemos_aspas:
+            if c not in " '\t''\n'{}();:~+-*/=.,@" or lemos_aspas:
                 palavra += c
             else:
                 if palavra != "":
-                    return palavra
-
-
-def sintatico():
-    token = ""
-    while(token != "Fim do arquivo"):
-        token = lexico()
-        print(token, num_linha, sep=' n:')
-       
-sintatico()
+                    return Lexico2.tipador(palavra)
