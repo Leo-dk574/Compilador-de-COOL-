@@ -17,7 +17,7 @@ def tipador(palavra):
     if(palavra.lower() in ["class","inherits","if","then","fi","while","loop","pool","let","in","case","of","esac","new","isvoid","not","true","false"]):
         token["tipo"] = "PR"
     if(palavra[0].isupper()):
-        token["tipo"] = "Class"
+        token["tipo"] = "TYPE"
     if(token["tipo"] == "Tipo"):
         token["tipo"] = "Variavel"
     return token
