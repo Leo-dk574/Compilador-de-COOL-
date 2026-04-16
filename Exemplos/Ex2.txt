@@ -9,4 +9,7 @@ class Main inherits IO {
             out_string(hello.concat(name.concat(ending)));
         }
     };
+
+    add(x : Variable) : VarList { (new VarListNE).init(x, self) };
+    init(y : Variable, r : VarList) : VarListNE { { x <- y; rest <- r; self; } };
 };

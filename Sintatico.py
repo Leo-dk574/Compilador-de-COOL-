@@ -22,56 +22,35 @@ def sintaticoExpr():
 
 def sintaticoFormal():
     print("Entrou no Formal")
-    token = {
-        "tipo": "",
-        "valor": ""
-    }
-    first_formal = True
     token = Lexico.lexico()
-    while(token["valor"] not in ")"):
-        if(first_formal):
-            if(token["tipo"] == "ID"):
-                token = Lexico.lexico()
-                if(token["valor"] == ":"):
-                    token = Lexico.lexico()
-                    if(token["tipo"] == "TYPE"):
-                        token = Lexico.lexico()
-                        first_formal = False
-                    else:
-                        mensagemErro(token, "TYPE")
-                        return True, token
-                else:
-                    mensagemErro(token, ":")
-                    return True, token
-            else:
-                mensagemErro(token, "ID")
-                return True, token
-        else:
-            token = Lexico.lexico()
-            if(token["valor"] == ","):
-                token = Lexico.lexico()         
-                if(token["tipo"] == "ID"):
-                    token = Lexico.lexico()
-                    if(token["valor"] == ":"):
-                        token = Lexico.lexico()
-                        if(token["tipo"] == "TYPE"):
-                            token = Lexico.lexico()
-                        else:
-                            mensagemErro(token, "TYPE")
-                            return True, token
-                    else:
-                        mensagemErro(token, ":")
-                        return True, token
-                else:
-                    mensagemErro(token, "ID")
-                    return True, token
-            else:
-                mensagemErro(token, ",")
-                return True, token
+
     if(token["valor"] == ")"):
         return False, token
-    else:
-        return True, token
+    
+    while True:
+        if(token["tipo"] != "ID"):
+            mensagemErro(token, "ID")
+            return True, token
+        
+        token = Lexico.lexico()
+        if(token["valor"] != ":"):
+            mensagemErro(token, ":")
+            return True, token
+
+        token = Lexico.lexico()
+        if(token["tipo"] != "TYPE"):
+            mensagemErro(token, "TYPE")
+            return True, token
+        
+        token = Lexico.lexico()
+        if(token["valor"] == ")"):
+            return False, token
+        
+        if(token["valor"] == ","):
+            token = Lexico.lexico()
+        else:
+            mensagemErro(token, ", ou )")
+            return True, token
 
 
 def sintaticoFeature(token):
@@ -80,6 +59,7 @@ def sintaticoFeature(token):
         token = Lexico.lexico()
         if(token["valor"] == "("):
             erro, token = sintaticoFormal()
+            print("Saiu do Formal")
             if(not erro):
                 token = Lexico.lexico()
                 if(token["valor"] == ":"):
