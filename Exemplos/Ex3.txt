@@ -1,0 +1,43 @@
+(* Teste 1: Classe simples com atributos e métodos *)
+class Calculadora {
+    x : Int;
+    y : Int <- {};
+    
+    soma(a : Int, b : Int) : Int {
+        {
+            a + b;
+        }
+    };
+
+    limpar() : Object {
+        y <- {}
+    };
+};
+
+(* Teste 2: Classe com herança e formal vazio *)
+class Cientifica inherits Calculadora {
+    pi : Float <- ;
+
+    potencia(base : Int, exp : Int) : Int {
+        {
+            base * exp;
+        }
+    };
+    
+    get_tipo() : String {
+        "Cientifica"
+    };
+};
+
+(* Teste 3: Classe Main com estrutura complexa de chaves para testar seu sintaticoExpr *)
+class Main inherits IO {
+    main() : Object {
+        {
+            out_string("Iniciando...");
+            if true then { 1; } else { 2; } fi;
+            let x : Int <- 5 in {
+                out_int(x);
+            };
+        }
+    };
+};

@@ -3,21 +3,26 @@ import Lexico
 def mensagemErro(token, token_esperado):
     print(f"Esperado {token_esperado} mas recebeu um {token["valor"]} do tipo {token["tipo"]} na linha:{Lexico.num_linha}")
 
-def sintaticoExpr():
+def sintaticoExpr(tipo=0):
     print("Entrou no Expr")
     chaves = 1
     token = {
         "tipo": "",
         "valor": ""
     }
-    while(token["tipo"] != "EOF"):
-        token = Lexico.lexico()
-        if(token["valor"] == '{'):
-            chaves = chaves + 1
-        if(token["valor"] == '}'):
-            chaves = chaves - 1
-        if(chaves == 0):
-            return False, token
+    if(tipo == 0):
+        while(token["tipo"] != "EOF"):
+            token = Lexico.lexico()
+            if(token["valor"] == '{'):
+                chaves = chaves + 1
+            if(token["valor"] == '}'):
+                chaves = chaves - 1
+            if(chaves == 0):
+                return False, token
+    else:
+        while(token["valor"] != ";"):
+            token = Lexico.lexico()
+        return False, token
 
 
 def sintaticoFormal():
@@ -55,100 +60,115 @@ def sintaticoFormal():
 
 def sintaticoFeature(token):
     print("Entrou no Feature")
-    if(token["tipo"] == "ID"):
+    
+    if token["tipo"] != "ID":
+        mensagemErro(token, "ID")
+        return True, token
+    
+    token = Lexico.lexico()
+    
+    if token["valor"] == "(":
+        erro, token = sintaticoFormal()
+        if erro: return True, token
+        
         token = Lexico.lexico()
-        if(token["valor"] == "("):
-            erro, token = sintaticoFormal()
-            print("Saiu do Formal")
-            if(not erro):
-                token = Lexico.lexico()
-                if(token["valor"] == ":"):
-                    token = Lexico.lexico()
-                    if(token["tipo"] == "TYPE"):
-                        token = Lexico.lexico()
-                        if(token["valor"] == "{"):
-                            erro, token = sintaticoExpr();
-                            if(not erro):
-                                if(token["valor"] == '}'): #mudar para }
-                                    return False, token
-                                else:
-                                    mensagemErro(token, "}")
-                                    return True, token
-                            else:
-                                return True, token
-                        else:
-                            return True, token
-                    else:
-                        return True, token
-                else:
-                    return True, token
-            else:
-                return True, token
-        else:
-            return True, token, "("
+        if token["valor"] != ":":
+            mensagemErro(token, ":")
+            return True, token
+            
+        token = Lexico.lexico()
+        if token["tipo"] != "TYPE":
+            mensagemErro(token, "TYPE")
+            return True, token
+            
+        token = Lexico.lexico()
+        if token["valor"] != "{":
+            mensagemErro(token, "{")
+            return True, token
+            
+        erro, token = sintaticoExpr()
+        if erro: return True, token
+        
+        if token["valor"] != "}":
+            mensagemErro(token, "}")
+            return True, token
+        
+        token = Lexico.lexico()
+        return False, token
+
+    elif token["valor"] == ":":
+        token = Lexico.lexico()
+        if token["tipo"] != "TYPE":
+            mensagemErro(token, "TYPE")
+            return True, token
+        
+        token = Lexico.lexico()
+        
+        if token["valor"] == "<-":
+            erro, token = sintaticoExpr(1)
+            if erro: return True, token
+        
+        return False, token
+
     else:
-        return True, token, "ID"
+        mensagemErro(token, "( ou :")
+        return True, token
     
 
-def sintaticoClass():
+def sintaticoClass(token):
     print("Entrou na Class")
-    token = {
-        "tipo":"",
-        "valor":""
-    }
-    token = Lexico.lexico()
-    if(token["valor"] == "class"):
-        token = Lexico.lexico()
-        if(token["tipo"] == "TYPE"):
-            token = Lexico.lexico()
-            if(token["valor"] == "inherits"):
-                token = Lexico.lexico()
-                if(token["tipo"] == "TYPE"):
-                    token = Lexico.lexico()
-                else:
-                    mensagemErro(token, "TYPE")
-                    return False
-            if(token["valor"] == '{'):
-                token = Lexico.lexico()
-                while(token["valor"] not in "}"):
-                    erro, token = sintaticoFeature(token);
-                    if(not erro):
-                        token = Lexico.lexico()
-                        if(token["valor"] == ";"):
-                            token = Lexico.lexico()
-                        else:
-                            mensagemErro(token, ";")
-                            return False
-                    else:
-                        return False
-                if(token["valor"] == '}'):
-                    return True
-                mensagemErro(token, '}')
-                return False
-            mensagemErro(token, "{")
-            return False
-        else:
-            mensagemErro(token, "TYPE")
-            return False
-    else:
+    
+    if token["valor"] != "class":
         mensagemErro(token, "class")
-        return False
+        return True
+    
+    token = Lexico.lexico()
+    if token["tipo"] != "TYPE":
+        mensagemErro(token, "TYPE")
+        return True
+    
+    token = Lexico.lexico()
+    if token["valor"] == "inherits":
+        
+        token = Lexico.lexico()
+        if token["tipo"] != "TYPE":
+            mensagemErro(token, "TYPE")
+            return True
+        token = Lexico.lexico()
+    
+    if token["valor"] != "{":
+        mensagemErro(token, "{")
+        return True
+    
+    token = Lexico.lexico()
+    while(token["valor"] != "}"):
+        erro, token = sintaticoFeature(token)
+        
+        if(erro):
+            return True
+        
+        if token["valor"] != ";":
+            mensagemErro(token, ";")
+            return True
+        token = Lexico.lexico()
+    return False
+
+
 
 def sintaticoProgram():
     print("Entrou no Program")
-    token = {
-        "tipo":"",
-        "valor":""
-    }
+    token = Lexico.lexico()
     while(token["tipo"] != "EOF"):
-        if(not sintaticoClass()):
-            print(f"Erro na Class")
+        erro = sintaticoClass(token)
+
+        if(erro):
             break
-        print("Terminou Class")
+
         token = Lexico.lexico()
-        if(token["valor"] != ';' and token["tipo"] != "EOF"):
-            print(f"Esperado ; mas encontrou {token["valor"]} na linha:{Lexico.num_linha}")
+        if token["valor"] != ";":
+            mensagemErro(token, ";")
             break
+        token = Lexico.lexico()
         
 
 def sintatico():
