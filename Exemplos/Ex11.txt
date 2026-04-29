@@ -1,0 +1,5 @@
+class Board inherits IO { 
+ size_of_board(initial : String) : Int {
+   initial.length()
+ };
+};

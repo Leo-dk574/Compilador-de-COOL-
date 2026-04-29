@@ -1,5 +1,5 @@
 import sys
-import Sintatico
+import Lexico
 
 def main():
     if len(sys.argv) < 2:
@@ -11,12 +11,18 @@ def main():
     caminho = f"Exemplos/Ex{numero}.txt"
 
     try:
-        Sintatico.Lexico.arquivoOpen(caminho)
+        Lexico.arquivoOpen(caminho)
     except FileNotFoundError:
         print(f"Arquivo {caminho} não encontrado.")
         return
 
-    Sintatico.sintaticoProgram()
+    token = {
+        "tipo": "",
+        "valor": ""
+    }
+    while(token["tipo"] != "EOF"):
+        token = Lexico.lexico()
+        print(f"{token["valor"]}   {token["tipo"]}   n:{Lexico.num_linha}")
 
 
 if __name__ == "__main__":
