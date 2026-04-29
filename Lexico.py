@@ -15,7 +15,7 @@ def arquivoOpen(nome):
 
 
 def tipador(palavra):
-    print(palavra)
+    #print(palavra)
     token = {
         "tipo": "Tipo",
         "valor": palavra
@@ -44,73 +44,110 @@ def tipador(palavra):
 
 
 def lexico():
-    global prox_token
+    global prox_token, c, f, num_linha
+    
     if prox_token is not None:
         token = prox_token
         prox_token = None
         return token
 
-    global c
-    global f
-    global num_linha
     palavra = ""
     lemos_aspas = False
-    comentario = False
+    comentario_bloco = 0 # COOL permite comentários aninhados (* (* *) *)
     comentario_linha = False
-    while(True):
-        if c == '\n':
-            if comentario_linha:
-                comentario_linha = False
-            num_linha += 1
-        if c in "{}();:~+-*/=.,@" and not lemos_aspas and (not comentario and not comentario_linha):
-            if c == '=':
-                aux2 = f.read(1)
-                if aux2 == '>':
-                    c = c+aux2
-                else:
-                    f.seek(f.tell()-1,0)
 
+    while True:
+        # 1. Tenta ler o próximo caractere se c estiver "vazio"
+        if c == '' or c == ' ' or c == '\t' or c == '\r':
+            c = f.read(1)
+        
+        if not c: 
+            return tipador("Fim do Arquivo")
+
+        # 2. Gerenciamento de Quebra de Linha
+        if c == '\n':
+            num_linha += 1
+            comentario_linha = False # Termina comentário de linha
+            c = f.read(1)
+            continue
+
+        # 3. Se estiver em comentário de linha, ignora tudo até o \n
+        if comentario_linha:
+            c = f.read(1)
+            continue
+
+        # 4. Tratamento de Comentários de Bloco (* *)
+        if c == '(':
+            proximo = f.read(1)
+            if proximo == '*':
+                comentario_bloco += 1
+                c = ' ' # Limpa para a próxima iteração
+                continue
+            else:
+                # Se não era comentário, devolve o caractere pro buffer
+                f.seek(f.tell()-1) 
+        
+        if c == '*' and comentario_bloco > 0:
+            proximo = f.read(1)
+            if proximo == ')':
+                comentario_bloco -= 1
+                c = ' '
+                continue
+            else:
+                f.seek(f.tell()-1)
+
+        if comentario_bloco > 0:
+            c = f.read(1)
+            continue
+
+        # 5. Comentário de Linha --
+        if c == '-':
+            proximo = f.read(1)
+            if proximo == '-':
+                comentario_linha = True
+                c = ' '
+                continue
+            else:
+                f.seek(f.tell()-1)
+
+        # 6. Captura de Strings
+        if c == '"':
+            palavra += c
+            c = f.read(1)
+            while c and c != '"':
+                if c == '\n': num_linha += 1
+                palavra += c
+                c = f.read(1)
+            palavra += c # fecha aspas
+            c = ' '
+            return tipador(palavra)
+
+        # 7. Operadores Compostos e Delimitadores
+        if c in "{}();:~+-*/=.,@<>":
+            # Verificar se é <- ou <= ou =>
+            if c in '<=>':
+                proximo = f.read(1)
+                if (c == '<' and proximo in '=-') or (c == '=' and proximo == '>'):
+                    token_composto = c + proximo
+                    c = ' '
+                    return tipador(token_composto)
+                else:
+                    f.seek(f.tell()-1)
+            
             aux = c
             c = ' '
             return tipador(aux)
-        else:
-            c = f.read(1)
-            if not c: 
-                return tipador("Fim do Arquivo")
-            if c in '(-' or (c == '*' and comentario):
-                aux = f.read(1)
-                if aux in '*-' or (aux == ')' and comentario):
-                    if c == '-' and aux == '-':
-                        comentario_linha = True
-                    else:
-                        comentario = not comentario
-                    c = ' '
-                    aux = ' '
-                else:
-                    f.seek(f.tell()-1,0)
-            if c == '<':
-                aux = f.read(1)
-                if aux == '-' or aux == '=':
-                    if palavra != '':
-                        f.seek(f.tell()-2,0)
-                        return tipador(palavra)
-                    else:
-                        return tipador(c+aux)
-                else:
-                    if palavra != '':
-                        f.seek(f.tell()-2,0)
-                        return tipador(palavra)
-                    else:
-                        f.seek(f.tell()-1,0)
-                        return tipador(c)
-            if not comentario and not comentario_linha:
-                if c == '"':
-                    lemos_aspas = not lemos_aspas
-                if c not in " '\t''\n'{}();:~+-*/=.,@" or lemos_aspas:
-                    palavra += c
-                else:
-                    if palavra != "":
-                        return tipador(palavra)
+
+        # 8. Identificadores, Palavras Reservadas e Números
+        if c.isalnum() or c == '_':
+            palavra = ""
+            while c.isalnum() or c == '_':
+                palavra += c
+                c = f.read(1)
+            return tipador(palavra)
+        
+        # Se for espaço ou algo não identificado, pula
+        c = ' '
                 
 
 def peek():
