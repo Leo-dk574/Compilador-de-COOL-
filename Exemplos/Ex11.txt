@@ -1,5 +1,30 @@
-class Board inherits IO { 
- size_of_board(initial : String) : Int {
-   initial.length()
- };
-};
+(* Arquivo para testar a detecção de erros sintáticos 
+*)
+
+class Erros inherits IO {
+    
+    -- Erro 1: Falta o tipo do atributo
+    atributo_sem_tipo <- 10; 
+
+    -- Erro 2: Falta fechar o parêntese dos parâmetros
+    metodo_ruim(a : Int, b : Bool : Object { 
+        out_string("erro aqui")
+    };
+
+    metodo_ok() : Int {
+        {
+            -- Erro 3: Atribuição sem ID
+            <- 5;
+
+            -- Erro 4: Esquecer o ';' entre expressões dentro de um bloco { }
+            out_int(10)
+            out_int(20);
+        }
+    };
+
+    -- Erro 5: Usar 'endif' ou 'end' em vez de 'fi'
+    testa_if() : Object {
+        if true then 1 else 0 endif
+    };
+
+}; -- Fim da classe

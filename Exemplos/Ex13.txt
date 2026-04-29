@@ -1,0 +1,23 @@
+class ErrosAvancados {
+    
+    -- Erro 9: Erro de aninhamento no LET
+    -- O 'let' permite múltiplas variáveis, mas a vírgula deve 
+    -- ser seguida por uma nova declaração, não pelo 'in' diretamente
+    metodo_let() : Int {
+        let x : Int <- 1, in x + 1
+    };
+
+    -- Erro 10: Falta do 'of' no Case
+    -- A sintaxe é 'case expr of', muitos esquecem o 'of'
+    testa_case(y : Object) : Object {
+        case y
+            n : Int => n;
+        esac
+    };
+
+    -- Erro 11: Bloco vazio
+    -- Em COOL, um bloco { } deve conter pelo menos UMA expressão.
+    metodo_vazio() : Object {
+        { }
+    };
+};

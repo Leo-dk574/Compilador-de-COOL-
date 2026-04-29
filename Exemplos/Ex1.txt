@@ -1,3 +1,4 @@
+-- certo
 class Main inherits IO {
     main() : Object { -- asibaioga <- inoi a 
     (*kghaha

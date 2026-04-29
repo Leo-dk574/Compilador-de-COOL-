@@ -1,7 +1,8 @@
 import Lexico
 from SintaticoExpr import mensagemErro
+import SintaticoExpr
 
-def sintaticoExpr(tipo=0):
+def sintaticoExprPrototipo(tipo=0):
     print("Entrou no Expr")
     chaves = 1
     token = {
@@ -65,6 +66,7 @@ def sintaticoFeature(token):
     
     token = Lexico.lexico()
     
+    
     if token["valor"] == "(":
         erro, token = sintaticoFormal()
         if erro: return True, token
@@ -84,34 +86,45 @@ def sintaticoFeature(token):
             mensagemErro(token, "{")
             return True, token
             
-        erro, token = sintaticoExpr()
+        erro, token = SintaticoExpr.sintaticoExpr()
         if erro: return True, token
-        
+
+        token = Lexico.lexico()
         if token["valor"] != "}":
             mensagemErro(token, "}")
             return True, token
         
+        
         token = Lexico.lexico()
+        if token["valor"] != ";":
+            mensagemErro(token, ";")
+            return True, token
+
         return False, token
 
+    
     elif token["valor"] == ":":
         token = Lexico.lexico()
         if token["tipo"] != "TYPE":
             mensagemErro(token, "TYPE")
             return True, token
         
-        token = Lexico.lexico()
-        
-        if token["valor"] == "<-":
-            erro, token = sintaticoExpr(1)
+        if Lexico.peek()["valor"] == "<-":
+            Lexico.lexico() 
+            erro, token = SintaticoExpr.sintaticoExpr()
             if erro: return True, token
         
+        
+        token = Lexico.lexico()
+        if token["valor"] != ";":
+            mensagemErro(token, ";")
+            return True, token
+
         return False, token
 
     else:
         mensagemErro(token, "( ou :")
         return True, token
-    
 
 def sintaticoClass(token):
     print("Entrou na Class")
@@ -167,13 +180,3 @@ def sintaticoProgram():
             mensagemErro(token, ";")
             break
         token = Lexico.lexico()
-        
-
-def sintatico():
-    token = {
-        "tipo": "",
-        "valor": ""
-    }
-    while(token["tipo"] != "EOF"):
-        token = Lexico.lexico()
-        print(f"{token["valor"]}   {token["tipo"]}   n:{Lexico.num_linha}")
