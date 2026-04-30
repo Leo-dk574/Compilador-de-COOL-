@@ -1,0 +1,15 @@
+-- certo
+class Main inherits IO {
+    main() : Object {
+        {
+            let x : Int <- 5, y : Int <- 10 in {
+                while x < y loop
+                    x <- x + 1
+                pool;
+                case x of
+                    a : Int => out_string("ok\n");
+                esac;
+            };
+        }
+    };
+};

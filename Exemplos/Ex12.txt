@@ -1,0 +1,24 @@
+class TesteEspecial {
+    metodo_case(x : Object) : Int {
+        case x of
+            n : Int => n;
+            s : String => s.length();
+            -- Erro 6: Falta o ';' após cada ramo (branch) do case
+            b : Bool => 1
+        esac
+    };
+
+    metodo_let() : Int {
+        -- Erro 7: Falta a palavra 'in' no bloco let
+        let temp : Int <- 5 {
+            temp + 1
+        }
+    };
+
+    -- Erro 8: Atributos com o mesmo nome dos parâmetros (Escopo)
+    -- Na verdade, o erro sintático aqui é a falta de separação 
+    -- ou erro na lista de parâmetros
+    erro_parametro(a : Int b : Int) : Int { 
+        a + b
+    };
+};

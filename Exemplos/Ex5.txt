@@ -1,0 +1,7 @@
+-- errado: :
+class Main inherits IO {
+    main() : Object {
+        let x <- 5 in
+            out_string("oi\n")
+    };
+};
